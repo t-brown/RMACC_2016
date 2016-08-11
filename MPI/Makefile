@@ -2,8 +2,10 @@
 # Makefile for MPI exercises
 #
 
-CFLAGS  = -O0 -g -Wall #-traceback -w3
-FCFLAGS = -O0 -g -Wall #-traceback
+CC      = mpicc
+FC      = mpifc
+CFLAGS  = -O0 -g #-traceback -w3
+FCFLAGS = -O0 -g #-traceback
 
 EXES = hello      \
        ring       \
