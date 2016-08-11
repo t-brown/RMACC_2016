@@ -21,8 +21,8 @@ program iring
 
         implicit none
 
-        integer, parameter             :: N = 100000
         integer, parameter             :: RINGTAG = 10
+        integer                        :: N
         integer                        :: ierr
         integer                        :: cnt
         integer                        :: nprocs
@@ -33,13 +33,19 @@ program iring
         integer                        :: mstat(MPI_STATUS_SIZE, 2)
         integer                        :: reqs(2)
         double precision, allocatable  :: x(:)
+        character(len=1024)            :: arg
 
         call MPI_Init(ierr)
         call MPI_Comm_size(MPI_COMM_WORLD, nprocs, ierr)
         call MPI_Comm_rank(MPI_COMM_WORLD, id, ierr)
         if (id == 0) then
                 print *, "Running on ", nprocs, "MPI processes"
+                call get_command_argument(1, arg)
+                read(arg, '(I4)') N
         end if
+
+        call MPI_Bcast(N, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+
         allocate(x(N*nprocs), stat=ierr)
         x(:) = id
         left = id + 1
