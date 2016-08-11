@@ -1,5 +1,5 @@
 #
-# Makefile for OpenMP thread number
+# Makefile for data alignment
 #
 
 include ../rules.inc

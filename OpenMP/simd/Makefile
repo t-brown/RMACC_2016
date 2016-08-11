@@ -9,4 +9,3 @@ EXES = simd_c \
 
 all: $(EXES)
 
-test: $(EXES)

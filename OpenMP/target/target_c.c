@@ -15,28 +15,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#define _POSIX_C_SOURCE 200809L
+#include "atts.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <err.h>
-
-#include "atts.h"
-
+#include <math.h>
 
 int
-plus(double * restrict a, double * restrict b, double ** restrict c, int n)
+init(double ** restrict a,
+     double ** restrict b,
+     double ** restrict c,
+     int n)
+{
+	double *x = ASSUME_ALIGNED(*a, ALIGNMENT);
+	double *y = ASSUME_ALIGNED(*b, ALIGNMENT);
+	double *z = ASSUME_ALIGNED(*c, ALIGNMENT);
+	int i = 0;
+
+#pragma omp target \
+	map(tofrom: x[:n], y[:n], z[:n])
+#pragma omp parallel for      \
+	default(none)         \
+	shared(x, y, z, n)    \
+	private(i)
+	for (i = 0; i < n; ++i) {
+		x[i] = 1.2;
+		y[i] = sin(i/57.296);
+		z[i] = 0.0;
+	}
+
+	return(EXIT_SUCCESS);
+}
+
+int
+plus(double * restrict a,
+     double * restrict b,
+     double ** restrict c,
+     int n)
 {
 	double *x = ASSUME_ALIGNED(a, ALIGNMENT);
 	double *y = ASSUME_ALIGNED(b, ALIGNMENT);
 	double *z = ASSUME_ALIGNED(*c, ALIGNMENT);
 	int i = 0;
 
-#pragma omp target device(0) \
-	map(to:x,y) map(from:z)
-#pragma omp parallel for   \
-	default(none)      \
-	shared(x, y, z, n) \
+#pragma omp target            \
+	map(to: x[:n], y[:n]) \
+	map(from: z[:n])
+#pragma omp parallel for      \
+	default(none)         \
+	shared(x, y, z, n)    \
 	private(i)
 	for (i = 0; i < n; ++i) {
 		z[i] = x[i] + y[i];
@@ -45,12 +73,13 @@ plus(double * restrict a, double * restrict b, double ** restrict c, int n)
 	return(EXIT_SUCCESS);
 }
 
+
 int
 main(int argc, char **argv)
 {
 	int ierr = 0;
 	int i = 0;
-	int n = 3200000;
+	int n = 32000000;
 	double *a = NULL;
 	double *b = NULL;
 	double *c = NULL;
@@ -71,18 +100,18 @@ main(int argc, char **argv)
 		err(ierr, "Unable to allocate: %ld", n * sizeof(double));
 	}
 
-	for (i = 0; i < n; ++i) {
-		a[i] = 1;
-		b[i] = 2;
-		c[i] = 0;
+	ierr = init(&a, &b, &c, n);
+	if (ierr) {
+		err(ierr, "Unable init vectors");
 	}
 
 	ierr = plus(a, b, &c, n);
 	if (ierr) {
 		err(ierr, "Unable add vectors");
 	}
-	for (i = 0; i < n; ++i) {
-		printf("%2d: a: %g\tb: %g\tc: %g\n",i, a[i], b[i], c[i]);
+
+	for (i = 0; i < n; i+=100000) {
+		printf("%8d\ta: %g\tb: %g\tc: %g\n",i, a[i], b[i], c[i]);
 	}
 
 	if (a) {

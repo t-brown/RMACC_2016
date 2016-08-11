@@ -17,4 +17,3 @@ all clean:
 	  $(MAKE) -C $$dir $@;    \
 	done
 
-

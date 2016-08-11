@@ -5,17 +5,12 @@
 CC      = icc
 FC      = ifort
 DEBUG   = -g -O0
-CFLAGS  = -fopenmp -std=c11 $(DEBUG)
-FCFLAGS = -fopenmp $(DEBUG)
+#REPORT  = -qopt-report=5 \
+#          -qopt-report-phase=vec,loop
+CFLAGS  = -fopenmp -std=c11 $(REPORT) $(DEBUG)
+FCFLAGS = -fopenmp $(REPORT) $(DEBUG) \
+          -D__BIGGEST_ALIGNMENT__=64
 
-#CC      = icc
-#FC      = ifort
-#DEBUG   = -O0 -g
-#REPORT  = -qopt-report=0 \
-#          -qopt-report-phase=vec,loop \
-#          -qopt-report-file=stderr
-#CFLAGS  = -qopenmp -std=c11 $(REPORT) $(DEBUG)
-#FCFLAGS = -qopenmp $(REPORT) $(DEBUG)
 
 # Note:
 # The opt-report levels are:
@@ -33,7 +28,13 @@ FCFLAGS = -fopenmp $(DEBUG)
 %:: %.f90
 	$(FC) -o $@ $(FCFLAGS) $<
 
+%:: %.F90
+	$(FC) -fpp -o $@ $(FCFLAGS) $<
+
+%.o: %.f90
+	$(FC) $(FCFLAGS) -c -o $@ $<
+
 all: $(EXES)
 
 clean:
-	-$(RM) $(EXES) *.o *.mod
+	$(RM) *.o *.mod $(EXES)

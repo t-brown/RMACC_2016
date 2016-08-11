@@ -24,7 +24,7 @@
 #include <err.h>
 #include <sysexits.h>
 
-#define ALIGNMENT 64
+#include "atts.h"
 
 int
 main(int argc, char **argv)

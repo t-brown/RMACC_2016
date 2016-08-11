@@ -16,6 +16,7 @@
  *
  */
 
+#include "atts.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,8 +24,6 @@
 #include <omp.h>
 #include <err.h>
 #include <sysexits.h>
-
-#define ALIGNMENT 64
 
 int
 main(int argc, char **argv)

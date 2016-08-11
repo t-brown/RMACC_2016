@@ -30,7 +30,11 @@ extern "C"
 #define _POSIX_C_SOURCE 200809L
 #define _GNU_SOURCE
 
-#define ALIGNMENT 64
+#ifdef __BIGGEST_ALIGNMENT__
+#  define ALIGNMENT __BIGGEST_ALIGNMENT__
+#else
+#  define ALIGNMENT 64
+#endif
 
 #if defined(__INTEL__)
 #  define ATT_ALIGN __attribute__((aligned(ALIGNMENT)))
